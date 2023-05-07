@@ -8,7 +8,7 @@ Prerequisite :
 
 How to Run this : 
 
-1. Download or Pull this repo to your local
+1. Download or Clone this repo to your local
 2. Extract .Zip
 3. Open your VS Code, and Open Folder test-flip-main
 4. Run Terminal in VS Code
