@@ -1,3 +1,5 @@
+let rate;
+
 class homepageEN {
     btn_LangEN() {
         return cy.contains('EN').click()
@@ -79,6 +81,7 @@ class phone_provider {
 }
 
 class send_simulation {
+    
     div_sendMoneySim() {
         return cy.get('#home > section.css-1x9gyb > div.css-kaqrt5 > div > h2').should('have.text', 'Kirim uang ke luar negeri')
     }
@@ -104,35 +107,46 @@ class send_simulation {
 
     changeto_GBP() {
         cy.get('button[class="chakra-menu__menu-button css-1l1pwnu"]').click()
+        cy.wait(2000)
         cy.contains('United Kingdom').click()
         return this
     }
 
     do_simulation() {
-
         let amount_IDR = 5000000;
         cy.get('input[placeholder="Masukkan nominal dalam IDR"]').type(amount_IDR)
         cy.wait(3000)
+        cy.fixture('rate.json').then(rate => {
+            let rate_GBP = parseFloat(rate.rateGBP)
+            cy.log('Rate GBP ADALAH : ' + rate_GBP)
+            let GBP_IDR = 0;
+            let rounded_result = 0;
 
-        const rate_GBP = 18648.51;
-        let GBP_IDR = 0;
-        let rounded_result = 0;
+            GBP_IDR = amount_IDR/rate_GBP;
+            rounded_result = parseFloat(GBP_IDR.toFixed(2));
 
-        GBP_IDR = amount_IDR/rate_GBP;
-        rounded_result = parseFloat(GBP_IDR.toFixed(2));
-
-        cy.xpath('//*[@id="__next"]/div/div/div[3]/div/div[2]/div[2]/div[2]/div[2]/input').invoke('val').as('nominal_GBP').then((nominal_GBP) => {
+            cy.xpath('//*[@id="__next"]/div/div/div[3]/div/div[2]/div[2]/div[2]/div[2]/input').invoke('val').as('nominal_GBP').then((nominal_GBP) => {
             
             let nominalGBP = 0;
             nominalGBP = parseFloat(nominal_GBP.replace(',', '.')).toFixed(2)*1
-            // cy.log("Nominal = " + nominalGBP)
             expect(nominalGBP).to.equal(rounded_result)
         })
+        });
+        
+    }
 
-        /* cy.get('#__next > div > div > div.css-14ily1w > div > div.css-0 > div:nth-child(2) > div.css-mqm6w4 > div > p').invoke('text').as('kurs_GBP').then((kurs_GBP) => {
-            const kursGBP = kurs_GBP;
-            cy.log("Kurs GBP = " + kursGBP)
-        }) */
+    check_rateGBP() {
+        cy.wait(1000)
+        cy.xpath('//*[@id="__next"]/div/div/div[3]/div/div[2]/div[2]/div[3]/div/p').invoke('text').then((text) => {
+            cy.log(text)
+            let text1 = text.substring(8,17)
+            let text2 = text1.replace('.','')
+            let text3 = text2.replace(',','.')
+            let rate = {
+                "rateGBP": text3,
+            }
+            cy.writeFile('./cypress/fixtures/rate.json', rate)
+        })
     }
 }
 

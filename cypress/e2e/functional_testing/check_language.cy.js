@@ -59,6 +59,7 @@ describe('Simulation Send Money', function() {
 
         sim.changeto_GBP()
         sim.assert_GBP()
+        sim.check_rateGBP()
         sim.do_simulation()
     })
 })
